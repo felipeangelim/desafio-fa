@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+  main:
+    container_name: main
+    build: .
+    command: >
+      bash -c "
+      cd /opt/americanas/ && 
+      jupyter lab"
+    ports:
+    - "8888:8888"
+    volumes:
+      - .:/opt/americanas/
