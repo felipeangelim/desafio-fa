@@ -4,7 +4,19 @@ import numpy as np
 
 
 def build_features(sales_df : pd.DataFrame, comp_prices_df : pd.DataFrame) -> pd.DataFrame:
-    
+    """Build features
+
+    Use the competitor's prices dataframe to add features to the aggregated sales dataframe.
+    We aggregate the sales daily by weighting the price by the number of sales with that price in that day. 
+
+    Args:
+        sales_df (pd.DataFrame): dataframe with sales data
+        comp_prices_df (pd.DataFrame): dataframe with competitor's prices data
+
+    Returns:
+        pd.DataFrame: cleaned dataframe
+    """
+
     comp_prices_df : pd.DataFrame = prepare_comp_prices(comp_prices_df.copy())
     sales_df : pd.DataFrame = weight_aggregate_sales_df(sales_df.copy())
 
@@ -39,7 +51,7 @@ def build_features(sales_df : pd.DataFrame, comp_prices_df : pd.DataFrame) -> pd
     day_agg_shift.rename(columns={"qty_order": "qty_day_shift"}, inplace=True)
     day_agg_shift = day_agg_shift[["prod_id", "date", "qty_day_shift"]]
     df = pd.merge(df,
-                day_agg_shift,
+                  day_agg_shift,
             on=["prod_id", "date"])
     
     df["diff_min_pct"] = (df.value_per_item - df["min"])/df["min"]
@@ -52,6 +64,14 @@ def build_features(sales_df : pd.DataFrame, comp_prices_df : pd.DataFrame) -> pd
 
 
 def prepare_comp_prices(comp_prices_df : pd.DataFrame) -> pd.DataFrame:
+    """Prepare the dataframe of competitor's prices
+
+    Args:
+        comp_prices_df (pd.DataFrame): dataframe withy competitor's prices  
+
+    Returns:
+        pd.DataFrame: Cleaned dataframe
+    """
     comp_prices_df.columns = list(map(str.lower, comp_prices_df.columns))
     comp_prices_df["date_extraction"] = pd.to_datetime(comp_prices_df["date_extraction"])
     comp_prices_df["date"] = pd.to_datetime(comp_prices_df["date_extraction"].dt.date)
@@ -63,6 +83,14 @@ def prepare_comp_prices(comp_prices_df : pd.DataFrame) -> pd.DataFrame:
     return comp_prices_df
 
 def weight_aggregate_sales_df(sales_df : pd.DataFrame) -> pd.DataFrame:
+    """Aggregate the price of sales dataframe daily
+
+    Args:
+        sales_df (pd.DataFrame): dataframe with sales data
+
+    Returns:
+        pd.DataFrame
+    """
 
     sales_df.columns = list(map(str.lower, sales_df.columns))
     sales_df["date_order"] = pd.to_datetime(sales_df.date_order)
