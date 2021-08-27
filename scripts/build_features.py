@@ -5,8 +5,8 @@ import numpy as np
 
 def build_features(sales_df : pd.DataFrame, comp_prices_df : pd.DataFrame) -> pd.DataFrame:
     
-    comp_prices_df : pd.DataFrame = prepare_comp_prices(comp_prices_df)
-    sales_df : pd.DataFrame = weight_aggregate_sales_df(sales_df)
+    comp_prices_df : pd.DataFrame = prepare_comp_prices(comp_prices_df.copy())
+    sales_df : pd.DataFrame = weight_aggregate_sales_df(sales_df.copy())
 
 
     df = pd.merge(sales_df.rename(columns={"date_order":"date"})\
@@ -46,6 +46,7 @@ def build_features(sales_df : pd.DataFrame, comp_prices_df : pd.DataFrame) -> pd
     df["diff_mean_pct"] = (df.value_per_item - df["mean"])/df["mean"]
 
     df = df.rename(columns={"value_per_item" : "price"})
+    df["qty_order_log"] = np.log(df.qty_order)
     return df
 
 
@@ -54,7 +55,11 @@ def prepare_comp_prices(comp_prices_df : pd.DataFrame) -> pd.DataFrame:
     comp_prices_df.columns = list(map(str.lower, comp_prices_df.columns))
     comp_prices_df["date_extraction"] = pd.to_datetime(comp_prices_df["date_extraction"])
     comp_prices_df["date"] = pd.to_datetime(comp_prices_df["date_extraction"].dt.date)
+
+    comp_prices_df = comp_prices_df.drop_duplicates(["date", "prod_id","competitor", "competitor_price"])
     comp_prices_df =  comp_prices_df.rename(columns = {"competitor_price" : "price"})[["prod_id", "date", "price"]]
+
+    
     return comp_prices_df
 
 def weight_aggregate_sales_df(sales_df : pd.DataFrame) -> pd.DataFrame:
