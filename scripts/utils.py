@@ -33,15 +33,6 @@ def build_features(sales_df : pd.DataFrame, comp_prices_df : pd.DataFrame) -> pd
          on=["date", "prod_id"]
           )
 
-    #day_agg = df.groupby(["prod_id", "date"])\
-    #     .agg({"qty_order" : "sum"})\
-    #     .rename(columns={"qty_order" : "qty_day"})\
-    #     .reset_index()
-
-    
-    #df = pd.merge(df,
-    #    day_agg,
-    #    on=["prod_id", "date"])#
 
     day_agg = df.copy()
 
